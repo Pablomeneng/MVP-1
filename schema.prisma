@@ -1,0 +1,72 @@
+datasource db {
+  provider = "sqlite"
+  // Wasp requires that the url is set to the DATABASE_URL environment variable.
+  url      = env("DATABASE_URL")
+}
+
+// Wasp requires the `prisma-client-js` generator to be present.
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  role Role
+  documents Document[]
+}
+
+enum Role {
+  ADMIN
+  GERENTE_NOTARIAL
+  USUARIO_NOTARIAL
+  CLIENTE
+}
+
+model Template {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  fileUrl String
+  placeholders Placeholder[]
+}
+
+model Placeholder {
+  id Int @id @default(autoincrement())
+  name String
+  templateId Int
+  template Template @relation(fields: [templateId], references: [id])
+}
+
+model Document {
+  id Int @id @default(autoincrement())
+  templateId Int
+  clientId Int
+  createdById Int?
+  status DocumentStatus
+  dataEntries DataEntry[]
+}
+
+enum DocumentStatus {
+  RECOLECCION
+  BORRADOR
+  REVISION
+  FIRMADO
+  REGISTRADO
+  ENTREGADO
+}
+
+model DataEntry {
+  id Int @id @default(autoincrement())
+  documentId Int
+  placeholderId Int
+  value String
+}
+
+model Tag {
+  id Int @id @default(autoincrement())
+  name String @unique
+  documents Document[]
+}
